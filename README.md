@@ -1,0 +1,1 @@
+Music Database API - A Spring Boot backend application providing comprehensive song information and details through RESTful APIs. Built with JPA/Hibernate for data persistence, Lombok for clean code, and featuring advanced search, filtering, sorting, and pagination capabilities for music datasets.
