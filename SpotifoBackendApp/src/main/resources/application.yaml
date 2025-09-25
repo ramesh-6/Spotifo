@@ -9,7 +9,7 @@ gateway:
 
 spring:
   application:
-    name: song-service
+    name: spotifo
 
   # =========================
   # MySQL Database Configuration

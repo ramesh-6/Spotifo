@@ -30,6 +30,21 @@ public class SongController {
         return ResponseEntity.ok(songDisplays);
     }
 
+    @GetMapping("/song")
+    public ResponseEntity<Page<SongDisplay>> getSongs(@RequestParam(required = false, defaultValue = "1") int page,
+                                                      @RequestParam(required = false, defaultValue = "12") int size,
+                                                      @RequestParam(required = false, defaultValue = "popularity") String sortby,
+                                                      @RequestParam(required = false, defaultValue = "DESC") String sortdirection,
+                                                      @RequestParam(required = false, defaultValue = "") String songname,
+                                                      @RequestParam(required = false, defaultValue = "") String artistname,
+                                                      @RequestParam(required = false, defaultValue = "") String albumname,
+                                                      @RequestParam(required = false, defaultValue = "") String releaseyear,
+                                                      @RequestParam(required = false, defaultValue = "0") int minpopularity) {
+        logger.info("Received Request to get songs by sorting, filtering and searching");
+        Page<SongDisplay> songDisplays = songService.getSongs(page, size, sortby, sortdirection, songname, artistname, albumname, releaseyear, minpopularity);
+        return ResponseEntity.ok(songDisplays);
+    }
+
     @GetMapping("/songs/search")
     public ResponseEntity<Page<SongDisplay>> getSongsBySongName(@RequestParam(required = false, defaultValue = "1") int page,
                                                       @RequestParam(required = false, defaultValue = "12") int size,

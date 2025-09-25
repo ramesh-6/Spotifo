@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>songService</groupId>
-	<artifactId>song-service</artifactId>
+	<artifactId>Spotifo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>song-service</name>
 	<description>Project to display music recommendation</description>
@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.2.0</version>
+			<version>2.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

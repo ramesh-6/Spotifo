@@ -8,6 +8,8 @@ public interface SongService {
 
     Page<SongDisplay> getAllSongs(int page, int size);
 
+    Page<SongDisplay> getSongs(int page, int size, String sortBy, String sortDirection, String trackName, String artistName, String albumName, String releaseYear, int minPopularity);
+
     Page<SongDisplay> getSongsBySongName(int page, int size , String trackName);
 
     Page<SongDisplay> getSongsIncludingSongName(int page, int size , String trackName);

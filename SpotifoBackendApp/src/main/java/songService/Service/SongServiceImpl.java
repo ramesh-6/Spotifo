@@ -59,7 +59,7 @@ public class SongServiceImpl implements SongService {
         logger.info("Getting all songs by popularity");
         try {
             Pageable pageable = PageRequest.of(page-1, size);
-            Page<Song> songPage = songRepository.findAllSongsbyPopularity(pageable);
+            Page<Song> songPage = songRepository.findAllSongsByPopularity(pageable);
             if (!songPage.isEmpty()) {
                 return songPage.map(SongMapper.INSTANCE::toDisplay);
             } else {
@@ -67,6 +67,33 @@ public class SongServiceImpl implements SongService {
             }
         } catch (DataAccessException e) {
             logger.error("Database error while fetching all songs", e);
+            throw new DatabaseException("Failed to retrieve songs", e);
+        }
+    }
+
+    @Override
+    public Page<SongDisplay> getSongs(int page, int size, String sortBy, String sortDirection, String trackName, String artistName, String albumName, String releaseYear, int minPopularity) {
+        logger.info("Getting songs by sort, filter and search");
+        try {
+            if (sortBy.equalsIgnoreCase("releasedate")){
+                sortBy = "albumReleaseDate";
+            }
+            Sort sort = Sort.by(sortBy);
+            if(sortDirection.equalsIgnoreCase("DESC")){
+                sort = sort.descending();
+            }
+            else {
+                sort = sort.ascending();
+            }
+            Pageable pageable = PageRequest.of(page-1, size, sort);
+            Page<Song> songPage = songRepository.findSongs(pageable, trackName, artistName, albumName, releaseYear, minPopularity);
+            if (!songPage.isEmpty()) {
+                return songPage.map(SongMapper.INSTANCE::toDisplay);
+            } else {
+                throw new NoSongFoundException("No songs exists in the system");
+            }
+        } catch (DataAccessException e) {
+            logger.error("Database error while fetching songs", e);
             throw new DatabaseException("Failed to retrieve songs", e);
         }
     }

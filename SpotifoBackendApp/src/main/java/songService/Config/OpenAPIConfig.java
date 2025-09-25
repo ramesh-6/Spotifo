@@ -16,14 +16,14 @@ public class OpenAPIConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Song Service API")
+                        .title("SpotInfo API")
                         .version("1.0")
                         .description("API for managing songs and music data")
                         .contact(new Contact()
-                                .name("Your Name")
-                                .email("your.email@example.com")))
+                                .name("Ramesh Kumar M K")
+                                .email("mkrk.ramesh006@gmail.com")))
                 .servers(Arrays.asList(
-                        new Server().url("http://localhost:8080").description("Development server")
+                        new Server().url("http://localhost:8085").description("Development server")
                 ));
     }
 }
