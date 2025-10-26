@@ -3,28 +3,65 @@ import './SongDetailModal.css';
 
 const API_BASE_URL = 'http://localhost:8085';
 
-const SongDetailModal = ({ isrc, isOpen, onClose }) => {
+const SongDetailModal = ({ isrc, onClose }) => {
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch song details when isrc changes
   useEffect(() => {
-    if (!isOpen || !isrc) return;
+    if (!isrc) return;
+
+    console.log(`Fetching song details for ISRC: ${isrc}`);
 
     setLoading(true);
     setError(null);
+    setSong(null);
 
     fetch(`${API_BASE_URL}/song/${isrc}`)
       .then(res => {
-        if (!res.ok) throw new Error('HTTP error! status: ' + res.status);
+        console.log(`Response status for ${isrc}: ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
-      .then(data => setSong(data))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [isOpen, isrc]);
+      .then(data => {
+        console.log('Song details received:', data);
+        setSong(data);
+      })
+      .catch(err => {
+        console.error(`Error fetching song ${isrc}:`, err);
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [isrc]);
 
-  // Formatter functions
+  // Close modal when clicking backdrop
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  // Close modal with Escape key and prevent body scroll
+  useEffect(() => {
+    const handleEscapeKey = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [onClose]);
+
+  // Helper functions
   const formatDuration = (ms) => {
     if (!ms) return 'N/A';
     const minutes = Math.floor(ms / 60000);
@@ -42,33 +79,36 @@ const SongDetailModal = ({ isrc, isOpen, onClose }) => {
     return `${(value * 100).toFixed(1)}%`;
   };
 
-  // Don't render if modal is not open
-  if (!isOpen) return null;
+  const getKeyName = (key) => {
+    const keyNames = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];
+    return keyNames[key] || 'N/A';
+  };
+
+  const getModeName = (mode) => {
+    return mode === 1 ? 'Major' : mode === 0 ? 'Minor' : 'N/A';
+  };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={handleBackdropClick}>
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
+
         {/* Header with song title and artist */}
         <div className="modal-header">
-          <div className="song-title">
-            {song ? song.trackName : 'Song Details'}
-          </div>
-          {song && (
-            <div className="song-artist">
-              {song.artistNames}
-            </div>
-          )}
-          <button 
-            className="modal-close" 
-            onClick={onClose} 
-            aria-label="Close modal"
-          >
+          <button className="modal-close" onClick={onClose}>
             ×
           </button>
+          {song && (
+            <>
+              <h1 className="song-title">{song.trackName || 'Unknown Track'}</h1>
+              <p className="song-artist">{song.artistNames || 'Unknown Artist'}</p>
+            </>
+          )}
         </div>
 
-        {/* Body */}
+        {/* Scrollable body with all details */}
         <div className="modal-body">
+
+          {/* Loading State */}
           {loading && (
             <div className="modal-loading">
               <div className="modal-loading-spinner"></div>
@@ -76,234 +116,204 @@ const SongDetailModal = ({ isrc, isOpen, onClose }) => {
             </div>
           )}
 
+          {/* Error State */}
           {error && (
             <div className="modal-error">
-              <h3>Error Loading Song</h3>
+              <h3>Oops! Something went wrong</h3>
               <p>{error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="modal-retry-btn"
-              >
-                Try Again
+              <button className="modal-retry-btn" onClick={() => window.location.reload()}>
+                Retry
               </button>
             </div>
           )}
 
+          {/* Song Details */}
           {song && (
             <>
-              {/* Album Image */}
+              {/* Album Image Section */}
               <div className="album-image-section">
-                <div className="album-image">
-                  {song.albumImageUrl ? (
+                {song.albumImageUrl ? (
+                  <div className="album-image">
                     <img 
                       src={song.albumImageUrl} 
-                      alt={song.albumName}
+                      alt={`${song.albumName || 'Unknown Album'} cover`}
                     />
-                  ) : (
-                    <div className="album-placeholder">🎵</div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="album-placeholder">
+                    🎵
+                  </div>
+                )}
               </div>
 
-              {/* Basic Song Metadata */}
-              <div className="song-metadata">
-                <div className="metadata-item">
-                  <span className="metadata-label">Duration</span>
-                  <span className="metadata-value">
-                    {formatDuration(song.trackDurationMs)}
-                  </span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Popularity</span>
-                  <span className="metadata-value">
-                    {song.popularity}/100
-                  </span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Release Date</span>
-                  <span className="metadata-value">
-                    {formatDate(song.albumReleaseDate)}
-                  </span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Explicit</span>
-                  <span className="metadata-value">
-                    {song.explicit === 'true' || song.explicit === true ? 'Yes' : 'No'}
-                  </span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Track Number</span>
-                  <span className="metadata-value">
-                    {song.trackNumber}
-                  </span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">ISRC</span>
-                  <span className="metadata-value" style={{ fontFamily: 'monospace' }}>
-                    {song.isrc}
-                  </span>
-                </div>
-              </div>
-
-              {/* Audio Preview */}
+              {/* Preview Audio Player with Dark Wrapper */}
               {song.trackPreviewUrl && (
                 <div className="preview-section">
-                  <audio
-                    controls
-                    src={song.trackPreviewUrl}
-                    style={{
-                      width: '100%',
-                      maxWidth: '400px',
-                      borderRadius: '12px',
-                      background: 'rgba(40, 40, 40, 0.6)'
-                    }}
-                  >
-                    Your browser does not support the audio element.
-                  </audio>
+                  <h3 className="details-heading">Preview</h3>
+                  <div className="audio-wrapper">
+                    <audio controls className="preview-audio">
+                      <source src={song.trackPreviewUrl} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
                 </div>
               )}
 
+              {/* Basic Song Information */}
+              <h3 className="details-heading">Song Information</h3>
+              <div className="song-metadata">
+                <div className="metadata-item">
+                  <span className="metadata-label">Album</span>
+                  <span className="metadata-value">{song.albumName || 'Unknown'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Album Artist</span>
+                  <span className="metadata-value">{song.albumArtistNames || 'Unknown'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Release Date</span>
+                  <span className="metadata-value">{formatDate(song.albumReleaseDate)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Duration</span>
+                  <span className="metadata-value">{formatDuration(song.trackDurationMs)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Track Number</span>
+                  <span className="metadata-value">{song.trackNumber || 'N/A'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Disc Number</span>
+                  <span className="metadata-value">{song.discNumber || 'N/A'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Popularity</span>
+                  <span className="metadata-value">{song.popularity || 'N/A'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Explicit</span>
+                  <span className="metadata-value">{song.explicit === "true" ? 'Yes' : 'No'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">ISRC</span>
+                  <span className="metadata-value">{song.isrc}</span>
+                </div>
+              </div>
+
               {/* Audio Features */}
-              {(typeof song.danceability !== 'undefined' || typeof song.energy !== 'undefined') && (
-                <>
-                  <div className="details-heading">Audio Features</div>
-                  <div className="song-metadata">
-                    {typeof song.danceability !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Danceability</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.danceability)}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.energy !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Energy</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.energy)}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.valence !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Valence</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.valence)}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.acousticness !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Acousticness</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.acousticness)}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.instrumentalness !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Instrumentalness</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.instrumentalness)}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.liveness !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Liveness</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.liveness)}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.speechiness !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Speechiness</span>
-                        <span className="metadata-value">
-                          {formatPercentage(song.speechiness)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+              <h3 className="details-heading">Audio Features</h3>
+              <div className="song-metadata">
+                <div className="metadata-item">
+                  <span className="metadata-label">Danceability</span>
+                  <span className="metadata-value">{formatPercentage(song.danceability)}</span>
+                </div>
 
-              {/* Technical Information */}
-              {(song.tempo || typeof song.key !== 'undefined' || song.loudness) && (
-                <>
-                  <div className="details-heading">Technical Information</div>
-                  <div className="song-metadata">
-                    {song.tempo && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Tempo</span>
-                        <span className="metadata-value">
-                          {song.tempo.toFixed(1)} BPM
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.key !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Key</span>
-                        <span className="metadata-value">
-                          {song.key}
-                        </span>
-                      </div>
-                    )}
-                    {typeof song.mode !== 'undefined' && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Mode</span>
-                        <span className="metadata-value">
-                          {song.mode === 1 ? 'Major' : 'Minor'}
-                        </span>
-                      </div>
-                    )}
-                    {song.timeSignature && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Time Signature</span>
-                        <span className="metadata-value">
-                          {song.timeSignature}/4
-                        </span>
-                      </div>
-                    )}
-                    {song.loudness && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Loudness</span>
-                        <span className="metadata-value">
-                          {song.loudness.toFixed(2)} dB
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                <div className="metadata-item">
+                  <span className="metadata-label">Energy</span>
+                  <span className="metadata-value">{formatPercentage(song.energy)}</span>
+                </div>
 
-              {/* Additional Information */}
-              {(song.artistGenres || song.label || song.copyrights) && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Speechiness</span>
+                  <span className="metadata-value">{formatPercentage(song.speechiness)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Acousticness</span>
+                  <span className="metadata-value">{formatPercentage(song.acousticness)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Instrumentalness</span>
+                  <span className="metadata-value">{formatPercentage(song.instrumentalness)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Liveness</span>
+                  <span className="metadata-value">{formatPercentage(song.liveness)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Valence</span>
+                  <span className="metadata-value">{formatPercentage(song.valence)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Tempo</span>
+                  <span className="metadata-value">
+                    {song.tempo ? `${song.tempo.toFixed(0)} BPM` : 'N/A'}
+                  </span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Key</span>
+                  <span className="metadata-value">{getKeyName(song.key)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Mode</span>
+                  <span className="metadata-value">{getModeName(song.mode)}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Time Signature</span>
+                  <span className="metadata-value">{song.timeSignature ? `${song.timeSignature}/4` : 'N/A'}</span>
+                </div>
+
+                <div className="metadata-item">
+                  <span className="metadata-label">Loudness</span>
+                  <span className="metadata-value">
+                    {song.loudness ? `${song.loudness.toFixed(1)} dB` : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Genre Information */}
+              {(song.artistGenres || song.albumGenres) && (
                 <>
-                  <div className="details-heading">Additional Information</div>
+                  <h3 className="details-heading">Genre Information</h3>
                   <div className="song-metadata">
                     {song.artistGenres && (
-                      <div className="metadata-item">
+                      <div className="metadata-item full-width">
                         <span className="metadata-label">Artist Genres</span>
-                        <span className="metadata-value">
-                          {song.artistGenres}
-                        </span>
+                        <span className="metadata-value">{song.artistGenres}</span>
                       </div>
                     )}
+
+                    {song.albumGenres && (
+                      <div className="metadata-item full-width">
+                        <span className="metadata-label">Album Genres</span>
+                        <span className="metadata-value">{song.albumGenres}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Label & Copyright Information */}
+              {(song.label || song.copyrights) && (
+                <>
+                  <h3 className="details-heading">Label & Copyright</h3>
+                  <div className="song-metadata">
                     {song.label && (
-                      <div className="metadata-item">
+                      <div className="metadata-item full-width">
                         <span className="metadata-label">Label</span>
-                        <span className="metadata-value">
-                          {song.label}
-                        </span>
+                        <span className="metadata-value">{song.label}</span>
                       </div>
                     )}
+
                     {song.copyrights && (
-                      <div className="metadata-item">
-                        <span className="metadata-label">Copyright</span>
-                        <span className="metadata-value">
-                          {song.copyrights}
-                        </span>
+                      <div className="metadata-item full-width">
+                        <span className="metadata-label">Copyrights</span>
+                        <span className="metadata-value copyright-text">{song.copyrights}</span>
                       </div>
                     )}
                   </div>

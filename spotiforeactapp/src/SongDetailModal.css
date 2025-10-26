@@ -7,7 +7,7 @@
   bottom: 0;
   background: rgba(18, 18, 18, 0.85);
   backdrop-filter: blur(20px);
-  z-index: 2000;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,7 +28,7 @@
 .modal-container {
   background: rgba(24, 24, 24, 0.75);
   border-radius: 20px;
-  box-shadow: 
+  box-shadow:
     0 25px 50px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(29, 185, 84, 0.2);
   max-width: 900px;
@@ -139,7 +139,7 @@
   transform: scale(0.95);
 }
 
-/* Modal Body */
+/* Modal Body - FIXED SCROLLING */
 .modal-body {
   padding: 32px 40px 40px 40px;
   max-height: calc(90vh - 120px);
@@ -194,7 +194,7 @@
   border-radius: 20px;
   overflow: hidden;
   background: #181818;
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(18, 18, 18, 0.7),
     0 0 0 1px rgba(29, 185, 84, 0.2);
   transition: transform 0.3s ease;
@@ -203,7 +203,7 @@
 
 .album-image:hover {
   transform: scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 16px 50px rgba(18, 18, 18, 0.8),
     0 0 0 1px rgba(29, 185, 84, 0.4);
 }
@@ -227,6 +227,48 @@
   font-size: 4rem;
   color: #b3b3b3;
   border: 1px solid rgba(29, 185, 84, 0.1);
+}
+
+/* Preview Section with Dark Wrapper */
+.preview-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 40px 0 40px 0; /* INCREASED MARGIN */
+}
+
+/* Dark wrapper container for audio player */
+.audio-wrapper {
+  background: #2a2a2a;
+  border: 2px solid rgba(29, 185, 84, 0.4);
+  border-radius: 12px;
+  padding: 6px;
+  width: 100%;
+  max-width: 500px;
+  transition: all 0.3s ease;
+}
+
+.audio-wrapper:hover {
+  border-color: #1DB954;
+}
+
+/* Audio player with dark theme filter */
+.preview-audio {
+  width: 100%;
+  height: 42px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background: transparent;
+
+  /* Make the white audio controls darker */
+  filter: invert(0.9) hue-rotate(180deg) contrast(1.1) brightness(1.1);
+}
+
+.preview-audio:focus {
+  outline: 2px solid #1DB954;
+  outline-offset: 2px;
 }
 
 /* Song Metadata - Grid layout */
@@ -256,6 +298,20 @@
   transform: translateY(-2px);
 }
 
+.metadata-item.full-width {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.metadata-item.full-width .metadata-value {
+  text-align: left;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
 .metadata-label {
   font-size: 1rem;
   color: #1DB954;
@@ -270,22 +326,15 @@
   color: #fff;
   font-weight: 600;
   text-align: right;
+  word-break: break-word;
+  max-width: 60%;
 }
 
-/* Preview Section */
-.preview-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin: 24px 0;
-}
-
-.preview-section audio {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
-  background: rgba(40, 40, 40, 0.6);
-  border: 1px solid rgba(29, 185, 84, 0.2);
+.copyright-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #b3b3b3;
+  font-weight: 400;
 }
 
 /* Section Headers */
@@ -425,6 +474,14 @@
     height: 36px;
     font-size: 20px;
   }
+
+  .preview-section {
+    margin: 32px 0 32px 0;
+  }
+
+  .audio-wrapper {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -466,6 +523,10 @@
     height: 32px;
     font-size: 18px;
   }
+
+  .preview-section {
+    margin: 24px 0 24px 0;
+  }
 }
 
 /* Accessibility */
@@ -487,7 +548,8 @@
 
 /* Focus states for accessibility */
 .modal-close:focus-visible,
-.modal-retry-btn:focus-visible {
+.modal-retry-btn:focus-visible,
+.preview-audio:focus-visible {
   outline: 2px solid #1DB954;
   outline-offset: 2px;
 }

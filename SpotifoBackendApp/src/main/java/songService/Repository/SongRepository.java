@@ -31,11 +31,4 @@ public interface SongRepository extends JpaRepository<Song, String> {
                          @Param("albumName") String albumName,
                          @Param("albumReleaseDate") String albumReleaseDate,
                          @Param("minPopularity") int minPopularity);
-
-    @Query("SELECT s FROM Song s WHERE LOWER(s.trackName) LIKE LOWER(CONCAT(:trackName, '%'))")
-    Page<Song> findByTrackName(@Param("trackName") String trackName, Pageable pageable);
-
-    @Query("SELECT s FROM Song s WHERE LOWER(s.trackName) LIKE LOWER(CONCAT('%', :trackName, '%'))")
-    Page<Song> findIncludingTrackName(@Param("trackName") String trackName, Pageable pageable);
-
 }

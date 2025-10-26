@@ -99,41 +99,6 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Page<SongDisplay> getSongsBySongName(int page, int size, String trackName) {
-        logger.info("Getting songs by track name: {}", trackName);
-        try {
-            Pageable pageable = PageRequest.of(page-1, size, Sort.by("popularity").descending());
-            Page<Song> songPage = songRepository.findByTrackName(trackName, pageable);
-            if (!songPage.isEmpty()) {
-                return songPage.map(SongMapper.INSTANCE::toDisplay);
-            } else {
-                throw new SongNotFoundException("song doesn't exists with name: " + trackName);
-            }
-        } catch (DataAccessException e) {
-            logger.error("Database error while fetching songs by track name", e);
-            throw new DatabaseException("Failed to retrieve songs by track name", e);
-        }
-    }
-
-    @Override
-    public Page<SongDisplay> getSongsIncludingSongName(int page, int size, String trackName) {
-        logger.info("Getting songs including track name: {}", trackName);
-        try {
-            Pageable pageable = PageRequest.of(page-1, size, Sort.by("popularity").descending());
-            Page<Song> songPage = songRepository.findIncludingTrackName(trackName, pageable);
-            if (!songPage.isEmpty()) {
-                return songPage.map(SongMapper.INSTANCE::toDisplay);
-            } else {
-                throw new SongNotFoundException("song doesn't exists with name: " + trackName);
-            }
-        } catch (DataAccessException e) {
-            logger.error("Database error while fetching songs by track name", e);
-            throw new DatabaseException("Failed to retrieve songs by track name", e);
-        }
-    }
-
-
-    @Override
     public SongDTO getSongByIsrc(String isrc) {
         logger.info("Getting song by ISRC: {}", isrc);
         try {

@@ -45,24 +45,6 @@ public class SongController {
         return ResponseEntity.ok(songDisplays);
     }
 
-    @GetMapping("/songs/search")
-    public ResponseEntity<Page<SongDisplay>> getSongsBySongName(@RequestParam(required = false, defaultValue = "1") int page,
-                                                      @RequestParam(required = false, defaultValue = "12") int size,
-                                                      @RequestParam(required = false, defaultValue = "") String songname) {
-        logger.info("Received Request to get songs by song name");
-        Page<SongDisplay> songDisplays = songService.getSongsBySongName(page, size, songname);
-        return ResponseEntity.ok(songDisplays);
-    }
-
-    @GetMapping("/songs/search/including")
-    public ResponseEntity<Page<SongDisplay>> getSongsIncludingSongName(@RequestParam(required = false, defaultValue = "1") int page,
-                                                                @RequestParam(required = false, defaultValue = "12") int size,
-                                                                @RequestParam(required = false, defaultValue = "") String songname) {
-        logger.info("Received Request to get songs including song name");
-        Page<SongDisplay> songDisplays = songService.getSongsIncludingSongName(page, size, songname);
-        return ResponseEntity.ok(songDisplays);
-    }
-
     @GetMapping("/song/{isrc}")
     public ResponseEntity<SongDTO> getSongByIsrc(@PathVariable String isrc) {
         logger.info("Received Request to get song by ISRC: {}", isrc);

@@ -17,4 +17,5 @@ public class SongDisplay {
     private String artistUris;
     private String albumName;
     private String albumUri;
+    private String albumImageUrl;
 }

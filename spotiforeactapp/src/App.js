@@ -33,7 +33,7 @@ function App() {
   const [selectedSongIsrc, setSelectedSongIsrc] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Enhanced fetchSongs to get detailed song data with album images
+  // UPDATED: Primary fetchSongs function - uses /songs endpoint first
   const fetchSongs = async () => {
     setLoading(true);
     setError(null);
@@ -64,46 +64,27 @@ function App() {
         });
       } else if (searchQuery.trim()) {
         // Use simple search endpoint
-        url = `${API_BASE_URL}/songs/search/including`;
+        url = `${API_BASE_URL}/song`;
         params.append('songname', searchQuery.trim());
       } else {
-        // Get all songs
+        // UPDATED: Use the main songs endpoint that should include album images
         url = `${API_BASE_URL}/songs`;
       }
 
-      const response = await fetch(`${url}?${params}`);
+      console.log(`Fetching: ${url}?${params}`); // Debug log
 
+      const response = await fetch(`${url}?${params}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('API Response:', data); // Debug log
 
-      // Enhanced songs with image data
-      const enhancedSongs = await Promise.all(
-        (data.content || []).map(async (song) => {
-          try {
-            // If we don't have albumImageUrl from the list endpoint, 
-            // fetch detailed song info to get the image
-            if (!song.albumImageUrl && song.isrc) {
-              const detailResponse = await fetch(`${API_BASE_URL}/song/${song.isrc}`);
-              if (detailResponse.ok) {
-                const detailData = await detailResponse.json();
-                return {
-                  ...song,
-                  albumImageUrl: detailData.albumImageUrl
-                };
-              }
-            }
-            return song;
-          } catch (err) {
-            console.warn(`Failed to fetch details for song ${song.isrc}:`, err);
-            return song;
-          }
-        })
-      );
-
-      setSongs(enhancedSongs);
+      // UPDATED: Use songs directly from the main endpoint (should already contain albumImageUrl)
+      // No more individual API calls for each song
+      const songsData = data.content || [];
+      setSongs(songsData);
       setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalElements || 0);
 
@@ -156,6 +137,7 @@ function App() {
     setCurrentPage(1);
   };
 
+  // UPDATED: Only fetch individual song details when user clicks on a song
   const handleSongClick = (isrc) => {
     setSelectedSongIsrc(isrc);
     setShowModal(true);
@@ -185,7 +167,7 @@ function App() {
     return pageSize >= 5 ? 'songs-grid grid-5-cols' : 'songs-grid';
   };
 
-  // Component for rendering album image with fallback
+  // UPDATED: Simplified AlbumImage component - expects albumImageUrl to be in the song object
   const AlbumImage = ({ song }) => {
     const [imageError, setImageError] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
@@ -199,21 +181,13 @@ function App() {
       setImageLoading(false);
     };
 
+    // Show placeholder if no image URL or error loading image
     if (!song.albumImageUrl || imageError) {
       return (
-        <div 
-          className="song-card-image album-placeholder"
-          style={{
-            backgroundColor: 'var(--spotify-darker)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '3rem',
-            color: 'var(--spotify-light-gray)',
-            border: '1px solid rgba(179, 179, 179, 0.1)'
-          }}
-        >
-          🎵
+        <div className="album-image-wrapper">
+          <div className="album-placeholder">
+            🎵
+          </div>
         </div>
       );
     }
@@ -221,104 +195,91 @@ function App() {
     return (
       <div className="album-image-wrapper">
         {imageLoading && (
-          <div 
-            className="song-card-image album-placeholder"
-            style={{
-              backgroundColor: 'var(--spotify-darker)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              color: 'var(--spotify-light-gray)',
-              position: 'absolute',
-              inset: 0
-            }}
-          >
+          <div className="album-placeholder">
             ⏳
           </div>
         )}
         <img
           src={song.albumImageUrl}
-          alt={`${song.albumName} by ${song.artistNames}`}
-          className="song-card-image album-cover"
+          alt={`${song.albumName || 'Unknown Album'} cover`}
+          className={`album-cover ${imageLoading ? 'loading' : ''}`}
           onLoad={handleImageLoad}
           onError={handleImageError}
-          style={{
-            opacity: imageLoading ? 0 : 1,
-            transition: 'opacity 0.3s ease'
-          }}
+          style={{ display: imageLoading ? 'none' : 'block' }}
         />
       </div>
     );
   };
 
-  const renderPagination = () => {
+  // Pagination component
+  const Pagination = () => {
     if (totalPages <= 1) return null;
 
-    const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const getVisiblePages = () => {
+      const delta = 2;
+      const range = [];
+      const rangeWithDots = [];
 
-    if (endPage - startPage < maxVisiblePages - 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
+      for (
+        let i = Math.max(2, currentPage - delta);
+        i <= Math.min(totalPages - 1, currentPage + delta);
+        i++
+      ) {
+        range.push(i);
+      }
 
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
+      if (currentPage - delta > 2) {
+        rangeWithDots.push(1, '...');
+      } else {
+        rangeWithDots.push(1);
+      }
+
+      rangeWithDots.push(...range);
+
+      if (currentPage + delta < totalPages - 1) {
+        rangeWithDots.push('...', totalPages);
+      } else {
+        rangeWithDots.push(totalPages);
+      }
+
+      return rangeWithDots;
+    };
 
     return (
       <div className="pagination-container">
         <div className="pagination">
-          <button 
-            className="pagination-button"
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
-            aria-label="First page"
-          >
-            ««
-          </button>
-          <button 
+          <button
             className="pagination-button"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            aria-label="Previous page"
           >
-            «
+            ← Previous
           </button>
 
-          {pages.map(page => (
+          {getVisiblePages().map((page, index) => (
             <button
-              key={page}
-              className={`pagination-button ${currentPage === page ? 'active' : ''}`}
-              onClick={() => handlePageChange(page)}
-              aria-label={`Page ${page}`}
+              key={index}
+              className={`pagination-button ${
+                page === currentPage ? 'active' : ''
+              }`}
+              onClick={() => typeof page === 'number' && handlePageChange(page)}
+              disabled={typeof page !== 'number'}
             >
               {page}
             </button>
           ))}
 
-          <button 
+          <button
             className="pagination-button"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            aria-label="Next page"
           >
-            »
-          </button>
-          <button 
-            className="pagination-button"
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            aria-label="Last page"
-          >
-            »»
+            Next →
           </button>
         </div>
 
         <div className="page-info">
-          Page {currentPage} of {totalPages} • {totalElements} total songs
+          Showing {songs.length} of {totalElements} songs (Page {currentPage} of {totalPages})
         </div>
       </div>
     );
@@ -326,10 +287,10 @@ function App() {
 
   return (
     <div className="App">
-      {/* Fixed Navbar */}
+      {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-container">
-          <div className="navbar-brand">
+          <div className="navbar-brand" onClick={() => window.location.reload()}>
             <div className="logo">
               <div className="logo-icon">
                 <div className="sound-wave">
@@ -341,29 +302,29 @@ function App() {
                 </div>
               </div>
               <h1 className="logo-text">
-                <span className="spot">Spot</span><span className="info">ifo</span>
+                <span className="spot">Spot</span>
+                <span className="info">ifo</span>
               </h1>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="main-content">
-        {/* Search Container */}
+      <div className="main-content">
         <div className="search-container">
-          {/* Main Search Bar */}
+          {/* Search Bar */}
           <div className="search-bar-container">
             <input
               type="text"
-              className="search-input"
-              placeholder="Search for song"
+              placeholder="Search for songs by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <button 
-              className="search-button" 
+            <button
               onClick={handleSearch}
+              className="search-button"
               disabled={loading}
             >
               {loading ? 'Searching...' : 'Search'}
@@ -377,38 +338,26 @@ function App() {
               className={`advanced-toggle-btn ${showAdvancedFilters ? 'active' : ''}`}
             >
               {showAdvancedFilters ? 'Hide Advanced Search' : 'Advanced Search'}
-              <span className={`arrow ${showAdvancedFilters ? 'up' : 'down'}`}>
-                {showAdvancedFilters ? '▲' : '▼'}
-              </span>
+              <span className="arrow">▼</span>
             </button>
 
-            <select 
-              value={pageSize} 
-              onChange={(e) => {
-                setPageSize(parseInt(e.target.value));
-                setCurrentPage(1);
-              }}
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
               className="page-size-select"
             >
               <option value={5}>5 per page</option>
               <option value={10}>10 per page</option>
               <option value={15}>15 per page</option>
               <option value={20}>20 per page</option>
-              <option value={25}>25 per page</option>
-              <option value={30}>30 per page</option>
             </select>
 
-            {(searchQuery || showAdvancedFilters) && (
-              <button
-                onClick={clearAllFilters}
-                className="clear-all-btn"
-              >
-                Clear All
-              </button>
-            )}
+            <button onClick={clearAllFilters} className="clear-all-btn">
+              Clear All
+            </button>
           </div>
 
-          {/* Advanced Filters Dropdown */}
+          {/* Advanced Filters */}
           {showAdvancedFilters && (
             <div className="advanced-filters-container">
               <div className="advanced-filters">
@@ -418,33 +367,33 @@ function App() {
                   <div className="filter-group">
                     <label>Artist Name</label>
                     <input
-                      className="filter-input"
                       type="text"
+                      placeholder="Enter artist name"
                       value={advancedFilters.artistname}
                       onChange={(e) => handleAdvancedFilterChange('artistname', e.target.value)}
-                      placeholder="Enter artist name"
+                      className="filter-input"
                     />
                   </div>
 
                   <div className="filter-group">
                     <label>Album Name</label>
                     <input
-                      className="filter-input"
                       type="text"
+                      placeholder="Enter album name"
                       value={advancedFilters.albumname}
                       onChange={(e) => handleAdvancedFilterChange('albumname', e.target.value)}
-                      placeholder="Enter album name"
+                      className="filter-input"
                     />
                   </div>
 
                   <div className="filter-group">
                     <label>Release Year</label>
                     <input
-                      className="filter-input"
                       type="text"
+                      placeholder="YYYY"
                       value={advancedFilters.releaseyear}
                       onChange={(e) => handleAdvancedFilterChange('releaseyear', e.target.value)}
-                      placeholder="YYYY"
+                      className="filter-input"
                     />
                   </div>
 
@@ -452,33 +401,30 @@ function App() {
                     <label>Min Popularity (0-100)</label>
                     <div className="number-input-container">
                       <input
-                        className="filter-input number-input"
                         type="number"
                         min="0"
                         max="100"
                         value={advancedFilters.minpopularity}
                         onChange={(e) => handleAdvancedFilterChange('minpopularity', parseInt(e.target.value) || 0)}
-                        placeholder="0"
+                        className="filter-input number-input"
                       />
                       <div className="number-controls">
                         <button
-                          type="button"
                           className="number-btn number-btn-up"
                           onClick={() => handlePopularityChange(1)}
-                          aria-label="Increase popularity"
+                          type="button"
                         >
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 3L9 7H3L6 3Z" fill="currentColor"/>
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 14l5-5 5 5z"/>
                           </svg>
                         </button>
                         <button
-                          type="button"
                           className="number-btn number-btn-down"
                           onClick={() => handlePopularityChange(-1)}
-                          aria-label="Decrease popularity"
+                          type="button"
                         >
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 9L3 5H9L6 9Z" fill="currentColor"/>
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 10l5 5 5-5z"/>
                           </svg>
                         </button>
                       </div>
@@ -487,24 +433,22 @@ function App() {
 
                   <div className="filter-group">
                     <label>Sort By</label>
-                    <select 
-                      className="filter-input"
-                      value={sortBy} 
+                    <select
+                      value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
+                      className="filter-input"
                     >
                       <option value="popularity">Popularity</option>
-                      <option value="trackName">Track Name</option>
-                      <option value="artistNames">Artist Names</option>
-                      <option value="albumName">Album Name</option>
+                      <option value="releasedate">Release Date</option>
                     </select>
                   </div>
 
                   <div className="filter-group">
                     <label>Sort Order</label>
-                    <select 
-                      className="filter-input"
-                      value={sortDirection} 
+                    <select
+                      value={sortDirection}
                       onChange={(e) => setSortDirection(e.target.value)}
+                      className="filter-input"
                     >
                       <option value="DESC">Descending</option>
                       <option value="ASC">Ascending</option>
@@ -513,10 +457,7 @@ function App() {
                 </div>
 
                 <div className="filters-actions">
-                  <button 
-                    onClick={handleSearch} 
-                    className="apply-filters-btn"
-                  >
+                  <button onClick={handleSearch} className="apply-filters-btn">
                     Apply Filters
                   </button>
                 </div>
@@ -538,59 +479,55 @@ function App() {
           <div className="error-state">
             <h3>Oops! Something went wrong</h3>
             <p>{error}</p>
-            <button onClick={fetchSongs} className="search-button">
-              Try Again
-            </button>
+          </div>
+        )}
+
+        {/* No Results */}
+        {!loading && !error && songs.length === 0 && (
+          <div className="no-results">
+            <h3>No songs found</h3>
+            <p>Try adjusting your search terms or filters</p>
           </div>
         )}
 
         {/* Songs Grid */}
-        {!loading && !error && (
+        {!loading && !error && songs.length > 0 && (
           <>
-            {songs.length === 0 ? (
-              <div className="no-results">
-                <h3>No songs found</h3>
-                <p>Try adjusting your search terms or filters</p>
-              </div>
-            ) : (
-              <div className={getGridClass()}>
-                {songs.map((song) => (
-                  <div
-                    key={song.isrc}
-                    className="song-card"
-                    onClick={() => handleSongClick(song.isrc)}
-                    tabIndex="0"
-                    role="button"
-                    aria-label={`View details for ${song.trackName} by ${song.artistNames}`}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        handleSongClick(song.isrc);
-                      }
-                    }}
-                  >
-                    {/* Album Image with fallback */}
-                    <AlbumImage song={song} />
-
-                    <div className="song-card-title">{song.trackName}</div>
-                    <div className="song-card-artist">{song.artistNames}</div>
-                    <div className="song-card-album">{song.albumName}</div>
+            <div className={getGridClass()}>
+              {songs.map((song) => (
+                <div
+                  key={song.isrc}
+                  className="song-card"
+                  onClick={() => handleSongClick(song.isrc)}
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleSongClick(song.isrc);
+                    }
+                  }}
+                >
+                  <AlbumImage song={song} />
+                  <div className="song-info">
+                    <h3 className="song-card-title">{song.trackName || 'Unknown Track'}</h3>
+                    <p className="song-card-artist">{song.artistNames || 'Unknown Artist'}</p>
+                    <p className="song-card-album">{song.albumName || 'Unknown Album'}</p>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
 
-            {/* Pagination */}
-            {renderPagination()}
+            <Pagination />
           </>
         )}
-      </main>
+      </div>
 
-      {/* Song Detail Modal - IMPORTANT: This is at the end of App, not inside any other component */}
-      <SongDetailModal
-        isrc={selectedSongIsrc}
-        isOpen={showModal}
-        onClose={closeModal}
-      />
+      {/* Modal for song details */}
+      {showModal && selectedSongIsrc && (
+        <SongDetailModal
+          isrc={selectedSongIsrc}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }
