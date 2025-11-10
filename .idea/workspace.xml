@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6b3cf98c-d434-4861-9e2c-bdda808d78d9" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/SpotifoBackendApp/src/main/java/songService/DTO/SongDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifoBackendApp/src/main/java/songService/DTO/SongDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SpotifoBackendApp/src/main/java/songService/Entity/Song.java" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifoBackendApp/src/main/java/songService/Entity/Song.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SpotifoBackendApp/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/SpotifoBackendApp/src/main/resources/application.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spotiforeactapp/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/spotiforeactapp/src/App.css" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "ramesh-6"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ramesh-6/Spotifo.git",
+    "accountId": "71ed4290-e02e-45b8-9402-3f5237ed502d"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 2
+}]]></component>
+  <component name="ProjectId" id="3532NyLsR8MHdu0RYrzCjpmcdPr" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "dev"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6b3cf98c-d434-4861-9e2c-bdda808d78d9" name="Changes" comment="" />
+      <created>1762324399055</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1762324399055</updated>
+    </task>
+    <servers />
+  </component>
+</project>

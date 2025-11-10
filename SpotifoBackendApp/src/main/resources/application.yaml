@@ -1,0 +1,80 @@
+# =========================
+# Server Configuration
+# =========================
+server:
+  port: 8085
+
+gateway:
+  secret: hdsgaf8iouqkjgsdjkjasgd
+
+spring:
+  application:
+    name: spotifo
+
+  # =========================
+  # MySQL Database Configuration
+  # =========================
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/spotify
+    username: root
+    password: mkrk7500
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # =========================
+  # JPA / Hibernate Configuration
+  # =========================
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # =========================
+  # H2 Console (disabled)
+  # =========================
+  # h2:
+  #   console:
+  #     enabled: true
+  #     path: /h2-ui
+
+  # =========================
+  # Cloud Gateway
+  # =========================
+  cloud:
+    gateway:
+      enabled: false
+
+# =========================
+# Logging Configuration
+# =========================
+logging:
+  level:
+    root: INFO
+    userService: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# =========================
+# Actuator & Prometheus Monitoring
+# =========================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+
+# =========================
+# Info Endpoint
+# =========================
+info:
+  app:
+    name: songService
+    description: Handles song information management
