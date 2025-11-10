@@ -1,8 +1,8 @@
-package songService.DTO;
+package songservice.dto;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import songService.Entity.Song;
+import songservice.entity.Song;
 
 @Mapper
 public interface SongMapper {

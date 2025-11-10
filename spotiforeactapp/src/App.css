@@ -284,7 +284,8 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   height: 48px;
-  min-width: 160px;
+  min-width: 180px;
+  width: 200px;
   position: relative;
   appearance: none;
   -webkit-appearance: none;
@@ -293,9 +294,9 @@ body {
     linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(60, 60, 60, 0.95) 100%),
     url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231DB954' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat, no-repeat;
-  background-position: right 14px center;
+  background-position: right 16px center;
   background-size: auto, 16px;
-  padding-right: 45px;
+  padding-right: 50px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(12px);
   text-align: center;
@@ -849,6 +850,8 @@ select.filter-input option:checked {
   align-items: center;
   gap: var(--space-16);
   margin-top: var(--space-32);
+  justify-content: center;
+  width: 100%;
 }
 
 .pagination {
@@ -857,6 +860,7 @@ select.filter-input option:checked {
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
 }
 
 .pagination-button {
@@ -895,6 +899,13 @@ select.filter-input option:checked {
   font-size: var(--font-size-md);
   font-weight: 500;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  margin: 0 auto;
+  width: 100%;
+  min-height: 40px;
 }
 
 /* No Results and Error States */

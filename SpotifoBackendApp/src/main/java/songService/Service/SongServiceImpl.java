@@ -1,4 +1,4 @@
-package songService.Service;
+package songservice.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,15 +10,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import songService.DTO.SongDTO;
-import songService.DTO.SongDisplay;
-import songService.DTO.SongMapper;
-import songService.Entity.Song;
-import songService.Exception.DatabaseException;
-import songService.Exception.NoSongFoundException;
-import songService.Exception.SongAlreadyExistException;
-import songService.Exception.SongNotFoundException;
-import songService.Repository.SongRepository;
+import songservice.dto.SongDTO;
+import songservice.dto.SongDisplay;
+import songservice.dto.SongMapper;
+import songservice.entity.Song;
+import songservice.exception.DatabaseException;
+import songservice.exception.NoSongFoundException;
+import songservice.exception.SongAlreadyExistException;
+import songservice.exception.SongNotFoundException;
+import songservice.repository.SongRepository;
 
 import java.util.Optional;
 

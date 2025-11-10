@@ -1,4 +1,4 @@
-package songService.Exception;
+package songservice.exception;
 
 public class SongNotFoundException extends RuntimeException {
     public SongNotFoundException(String message) {

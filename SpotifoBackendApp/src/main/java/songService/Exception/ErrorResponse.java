@@ -1,4 +1,4 @@
-package songService.Exception;
+package songservice.exception;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

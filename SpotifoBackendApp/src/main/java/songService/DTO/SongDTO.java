@@ -1,4 +1,4 @@
-package songService.DTO;
+package songservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,5 +46,5 @@ public class SongDTO {
     private String albumGenres;
     private String label;
     private String copyrights;
-
+    private SongV2DTO songV2;
 }

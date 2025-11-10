@@ -1,4 +1,4 @@
-package songService.Entity;
+package songservice.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -113,4 +113,8 @@ public class Song {
 
     @Column(name = "Copyrights", columnDefinition = "TEXT")
     private String copyrights;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "ISRC", referencedColumnName = "ISRC")
+    private SongV2 songV2;
 }

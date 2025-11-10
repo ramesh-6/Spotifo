@@ -1,8 +1,8 @@
-package songService.Service;
+package songservice.service;
 
 import org.springframework.data.domain.Page;
-import songService.DTO.SongDTO;
-import songService.DTO.SongDisplay;
+import songservice.dto.SongDTO;
+import songservice.dto.SongDisplay;
 
 public interface SongService {
 

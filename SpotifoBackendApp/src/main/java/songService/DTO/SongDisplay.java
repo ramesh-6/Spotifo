@@ -1,4 +1,4 @@
-package songService.DTO;
+package songservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
